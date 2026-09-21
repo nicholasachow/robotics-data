@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <style>
   :root {
     --bg: #f6f3ee;
@@ -46,13 +47,6 @@
       --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
     }
   }
-  :root[data-theme="dark"] {
-    --bg: #151412; --bg-elev: #1e1c19; --ink: #f1ece4; --ink-2: #c9c1b5; --ink-3: #8f877c;
-    --line: #2b2823; --line-2: #3a362f; --accent: #e0703f; --t-collect: #e0703f; --t-curate: #6fa6d6;
-    --t-sim: #a394de; --t-hw: #7fb379; --t-lab: #f1ece4; --chip-bg: #262320;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
-  }
-
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
@@ -78,7 +72,7 @@
   .byline { margin: 16px 0 0; color: var(--ink-3); font-size: 14px; }
   .byline a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--line-2); }
   .byline a:hover { color: var(--accent); border-color: var(--accent); }
-  /* Logo: fixed bottom-right watermark, links to Twitter */
+  /* Logo: fixed bottom-right watermark, links to nicholasachow.com */
   .mark { display: block; position: fixed; right: 20px; bottom: 20px; height: 34px; color: var(--ink); line-height: 0; opacity: .55; z-index: 5; }
   .mark svg { display: block; height: 100%; width: auto; }
   .mark:hover { opacity: 1; color: var(--accent); }
@@ -92,11 +86,6 @@
     font-variation-settings: "opsz" 144;
   }
   h1 em { font-style: italic; color: var(--accent); }
-  .lede {
-    max-width: 640px; font-size: 17px; color: var(--ink-2); margin: 0 0 8px;
-  }
-  .lede strong { color: var(--ink); font-weight: 600; }
-  .meta { color: var(--ink-3); font-size: 13px; }
 
   /* Supply chain */
   section { margin: 44px 0; }
@@ -231,7 +220,7 @@
       <div class="k"><i></i> Buyers</div>
       <div class="t">The labs</div>
       <div class="n">World-model labs, robot foundation-model companies, and industrials with captive operations.</div>
-      <div class="buyers">
+      <div class="buyers" id="buyers">
         <span>Figure</span><span>Physical Intelligence</span><span>Skild</span><span>1X</span><span>World Labs</span><span>DeepMind</span><span>NVIDIA</span><span>Meta</span><span>Amazon</span><span>Tesla</span>
       </div>
     </div>
@@ -333,12 +322,14 @@ function filtered(){
   }).sort((a,b) => {
     const k = state.sortK;
     let va, vb;
-    if (k === "tier") { va = tierOrder(a.tier); vb = tierOrder(b.tier); if (va === vb) { va = a.name; vb = b.name; } }
-    else if (k === "mods") { va = (a.mods||[]).join(); vb = (b.mods||[]).join(); }
-    else { va = (a[k]||"").toString().toLowerCase(); vb = (b[k]||"").toString().toLowerCase(); }
-    if (va < vb) return -1 * state.sortDir;
-    if (va > vb) return 1 * state.sortDir;
-    return 0;
+    const cmp = (x, y) => String(x).localeCompare(String(y), "en", { sensitivity: "base" }) * state.sortDir;
+    if (k === "tier") {
+      va = tierOrder(a.tier); vb = tierOrder(b.tier);
+      if (va !== vb) return (va - vb) * state.sortDir;
+      return cmp(a.name || "", b.name || "");
+    }
+    if (k === "mods") return cmp((a.mods||[]).join(), (b.mods||[]).join());
+    return cmp(a[k] || "", b[k] || "");
   });
 }
 
@@ -411,6 +402,11 @@ $("#clear").addEventListener("click", () => {
   const byTier = t => DATA.filter(d => d.tier === t).length;
   document.querySelectorAll("[data-count]").forEach(el => el.textContent = byTier(el.dataset.count));
 })();
+
+// Buyer chips from the sheet; the hard-coded spans in the markup stay as the fallback
+if (Array.isArray(L.buyers) && L.buyers.length) {
+  $("#buyers").innerHTML = L.buyers.map(b => `<span>${esc(b)}</span>`).join("");
+}
 
 if (window.META && window.META.updated) {
   const d = new Date(window.META.updated + "T00:00:00");

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="9.63 184.02 822.69 822.69">
+  <style>@media (prefers-color-scheme: dark){ rect.mark{ fill:#f1ece4 } }</style>
+  <defs>
+    <mask id="nc-mask">
+      <rect x="73.28" y="184.02" width="695.39" height="822.69" fill="white"/>
+      <path fill="black" d="M420.99,590.81c.4-47.84,8.18-99.48,25.2-149.23,17.02-49.75,43.27-97.62,76.63-137.08s73.81-70.52,115.87-90.66c42.05-20.13,85.7-29.34,126.14-29.81-114.61,0-229.22,0-343.84-.01,0,135.6,0,271.19.01,406.79Z"/>
+      <path fill="black" d="M420.98,1006.71V184.02H73.29c115.9,274.23,231.79,548.46,347.69,822.69Z"/>
+    </mask>
+  </defs>
+  <rect class="mark" x="73.28" y="184.02" width="695.39" height="822.69" fill="#1c1a17" mask="url(#nc-mask)"/>
+</svg>
