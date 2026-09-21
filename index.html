@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Physical AI Data Stack</title>
+<meta name="description" content="A living map of who manufactures training data for robots and world models: collectors, curation platforms, simulation, and capture hardware.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f3ee;
+    --bg-elev: #fffdf9;
+    --ink: #1c1a17;
+    --ink-2: #4c4741;
+    --ink-3: #857d73;
+    --line: #e4ded4;
+    --line-2: #d2cabd;
+    --accent: #b5471d;
+    --t-collect: #b5471d;
+    --t-curate: #2f6f9f;
+    --t-sim: #6b5ca5;
+    --t-hw: #4f7f4a;
+    --t-lab: #1c1a17;
+    --chip-bg: #eee9e0;
+    --shadow: 0 1px 2px rgba(28,26,23,.05), 0 8px 24px rgba(28,26,23,.06);
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151412;
+      --bg-elev: #1e1c19;
+      --ink: #f1ece4;
+      --ink-2: #c9c1b5;
+      --ink-3: #8f877c;
+      --line: #2b2823;
+      --line-2: #3a362f;
+      --accent: #e0703f;
+      --t-collect: #e0703f;
+      --t-curate: #6fa6d6;
+      --t-sim: #a394de;
+      --t-hw: #7fb379;
+      --t-lab: #f1ece4;
+      --chip-bg: #262320;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151412; --bg-elev: #1e1c19; --ink: #f1ece4; --ink-2: #c9c1b5; --ink-3: #8f877c;
+    --line: #2b2823; --line-2: #3a362f; --accent: #e0703f; --t-collect: #e0703f; --t-curate: #6fa6d6;
+    --t-sim: #a394de; --t-hw: #7fb379; --t-lab: #f1ece4; --chip-bg: #262320;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 16px; }
+
+  /* Header */
+  .hero { position: relative; padding: 44px 0 6px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px;
+    font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-3); font-weight: 600;
+  }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .byline { margin: 16px 0 0; color: var(--ink-3); font-size: 14px; }
+  .byline a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid var(--line-2); }
+  .byline a:hover { color: var(--accent); border-color: var(--accent); }
+  /* Logo: fixed bottom-right watermark, links to Twitter */
+  .mark { display: block; position: fixed; right: 20px; bottom: 20px; height: 34px; color: var(--ink); line-height: 0; opacity: .55; z-index: 5; }
+  .mark svg { display: block; height: 100%; width: auto; }
+  .mark:hover { opacity: 1; color: var(--accent); }
+  h1 {
+    font-family: Fraunces, Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(38px, 6vw, 66px);
+    line-height: 1.02;
+    letter-spacing: -.02em;
+    margin: 0;
+    font-variation-settings: "opsz" 144;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+  .lede {
+    max-width: 640px; font-size: 17px; color: var(--ink-2); margin: 0 0 8px;
+  }
+  .lede strong { color: var(--ink); font-weight: 600; }
+  .meta { color: var(--ink-3); font-size: 13px; }
+
+  /* Supply chain */
+  section { margin: 44px 0; }
+  section:last-of-type { margin-bottom: 72px; }
+  header + section { margin-top: 26px; }
+  h2 {
+    font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: 26px;
+    letter-spacing: -.01em; margin: 0 0 6px;
+  }
+  .sub { color: var(--ink-2); margin: 0 0 20px; max-width: 640px; }
+
+  .chain { display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 28px; align-items: stretch; position: relative; }
+  .stage {
+    background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 18px 18px 16px; position: relative; cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s;
+  }
+  .stage:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--line-2); }
+  .stage.active { border-color: var(--c); box-shadow: 0 0 0 2px var(--c) inset; }
+  .stage::after {
+    content: ""; position: absolute; right: -28px; top: 50%; width: 28px; height: 2px;
+    background: var(--line-2);
+  }
+  .stage:last-child::after { display: none; }
+  .stage .k { display: flex; align-items: center; gap: 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); font-weight: 600; }
+  .stage .k i { width: 10px; height: 10px; border-radius: 3px; background: var(--c); display: inline-block; }
+  .stage .t { font-family: Fraunces, Georgia, serif; font-size: 22px; margin: 8px 0 4px; font-weight: 500; }
+  .stage .n { font-size: 13px; color: var(--ink-2); min-height: 40px; }
+  .stage .cnt { margin-top: 10px; font-size: 13px; color: var(--ink-3); }
+  .stage .cnt b { color: var(--ink); font-weight: 600; }
+  .stage.lab { background: transparent; border-style: dashed; cursor: default; }
+  .stage.lab:hover { transform: none; box-shadow: none; }
+  .stage.lab .buyers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .stage.lab .buyers span { font-size: 12px; padding: 3px 8px; border: 1px solid var(--line-2); border-radius: 999px; color: var(--ink-2); }
+
+  .lane {
+    margin-top: 14px; display: grid; grid-template-columns: repeat(4, 1fr); column-gap: 28px;
+  }
+  .lane .stage::after { display: none; }
+  .lane .stage.sim { grid-column: 1 / 4; padding: 14px 18px 12px; }
+  .lane .stage.sim .t { font-size: 20px; margin: 6px 0 2px; }
+  .lane .stage.sim .n { min-height: 0; }
+  .lane .stage.sim .cnt { margin-top: 6px; }
+
+  /* Filters */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .search {
+    flex: 1 1 220px; min-width: 200px;
+    background: var(--bg-elev); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px;
+    font: inherit; color: var(--ink);
+  }
+  .search:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .group .lbl { font-size: 12px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin-right: 4px; }
+  .chip {
+    font: inherit; font-size: 13px; padding: 5px 11px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--chip-bg); color: var(--ink-2); cursor: pointer;
+  }
+  .chip:hover { border-color: var(--line-2); color: var(--ink); }
+  .chip.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .clear { font: inherit; font-size: 13px; background: none; border: none; color: var(--accent); cursor: pointer; padding: 4px 6px; text-decoration: underline; }
+  .count { font-size: 13px; color: var(--ink-3); margin-left: auto; }
+
+  /* Table */
+  .tablewrap { background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--radius); overflow: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 820px; }
+  thead th {
+    text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); font-weight: 600;
+    padding: 12px 14px; border-bottom: 1px solid var(--line); background: var(--bg-elev); position: sticky; top: 0; cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  thead th:hover { color: var(--ink); }
+  thead th .arrow { opacity: .5; margin-left: 4px; }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 14px; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: color-mix(in srgb, var(--chip-bg) 60%, transparent); }
+  td.co { font-weight: 600; white-space: nowrap; }
+  td.co a, td.sample a { color: inherit; text-decoration: none; border-bottom: 1px solid var(--line-2); }
+  td.co a:hover, td.sample a:hover { color: var(--accent); border-color: var(--accent); }
+  td.co .zh { font-weight: 400; color: var(--ink-3); margin-left: 4px; }
+  td.co .sub { display: block; font-weight: 400; font-size: 12px; color: var(--ink-3); margin: 2px 0 0; }
+  .tier { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+  .tier i { width: 9px; height: 9px; border-radius: 3px; display: inline-block; background: var(--c); }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--chip-bg); color: var(--ink-2); white-space: nowrap; }
+  td.geo { color: var(--ink-2); }
+  td.geo .cap { display: block; font-size: 12px; color: var(--ink-3); }
+  td.notes { color: var(--ink-2); max-width: 340px; }
+  td.notes .cap { display: block; font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+  td.sample { color: var(--ink-2); max-width: 200px; }
+  .empty { padding: 40px; text-align: center; color: var(--ink-3); }
+
+
+  @media (max-width: 860px) {
+    .chain { grid-template-columns: 1fr; gap: 14px; }
+    .stage::after { display: none; }
+    .lane { grid-template-columns: 1fr; }
+    .lane .stage.sim { grid-column: auto; }
+    .hero { padding-top: 32px; }
+    .mark { right: 14px; bottom: 14px; height: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="eyebrow"><span class="dot"></span> Updated <span id="updated">Sep 18, 2026</span></div>
+  <h1>The physical AI data stack</h1>
+  <p class="byline">Compiled by <a href="https://nicholasachow.com/">Nick Chow</a>. <a href="https://twitter.com/nicholasachow" target="_blank" rel="noopener">DM for comments and questions.</a></p>
+</header>
+
+<section>
+  <div class="chain">
+    <div class="stage" data-tier="Capture hardware" style="--c: var(--t-hw)">
+      <div class="k"><i></i> Stage 1</div>
+      <div class="t">Capture hardware</div>
+      <div class="n">Glasses, depth cameras, mocap suits and tactile gloves that turn a worker into a sensor.</div>
+      <div class="cnt"><b data-count="Capture hardware"></b> companies</div>
+    </div>
+    <div class="stage" data-tier="Collector" style="--c: var(--t-collect)">
+      <div class="k"><i></i> Stage 2</div>
+      <div class="t">Collectors</div>
+      <div class="n">Operations businesses that record people and robots doing physical tasks. Concentrated where labor is cheap.</div>
+      <div class="cnt"><b data-count="Collector"></b> companies</div>
+    </div>
+    <div class="stage" data-tier="Curation &amp; aggregation" style="--c: var(--t-curate)">
+      <div class="k"><i></i> Stage 3</div>
+      <div class="t">Curation &amp; aggregation</div>
+      <div class="n">The refineries. Onboard many vendors, run QC pipelines, sell finished datasets to labs.</div>
+      <div class="cnt"><b data-count="Curation &amp; aggregation"></b> companies</div>
+    </div>
+    <div class="stage lab" style="--c: var(--t-lab)">
+      <div class="k"><i></i> Buyers</div>
+      <div class="t">The labs</div>
+      <div class="n">World-model labs, robot foundation-model companies, and industrials with captive operations.</div>
+      <div class="buyers">
+        <span>Figure</span><span>Physical Intelligence</span><span>Skild</span><span>1X</span><span>World Labs</span><span>DeepMind</span><span>NVIDIA</span><span>Meta</span><span>Amazon</span><span>Tesla</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="lane">
+    <div class="stage sim" data-tier="Simulation &amp; synthetic" style="--c: var(--t-sim)">
+      <div class="k"><i></i> Parallel lane</div>
+      <div class="t">Simulation &amp; synthetic</div>
+      <div class="n">Physics engines and game data. Works well for locomotion, still a complement for contact-rich manipulation.</div>
+      <div class="cnt"><b data-count="Simulation &amp; synthetic"></b> companies</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Companies</h2>
+
+  <div class="toolbar">
+    <input class="search" id="q" type="search" placeholder="Search companies, datasets, notes…" aria-label="Search">
+    <span class="count" id="count"></span>
+  </div>
+  <div class="toolbar">
+    <div class="group" id="tierChips"><span class="lbl">Tier</span></div>
+  </div>
+  <div class="toolbar">
+    <div class="group" id="modChips"><span class="lbl">Modality</span></div>
+  </div>
+  <div class="toolbar">
+    <div class="group" id="regionChips"><span class="lbl">Region</span></div>
+    <button class="clear" id="clear" hidden>Clear filters</button>
+  </div>
+
+  <div class="tablewrap">
+    <table id="tbl">
+      <thead><tr id="head"></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</section>
+
+
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <mask id="nc-mask">
+      <rect x="73.28" y="184.02" width="695.39" height="822.69" fill="white"/>
+      <path fill="black" d="M420.99,590.81c.4-47.84,8.18-99.48,25.2-149.23,17.02-49.75,43.27-97.62,76.63-137.08s73.81-70.52,115.87-90.66c42.05-20.13,85.7-29.34,126.14-29.81-114.61,0-229.22,0-343.84-.01,0,135.6,0,271.19.01,406.79Z"/>
+      <path fill="black" d="M420.98,1006.71V184.02H73.29c115.9,274.23,231.79,548.46,347.69,822.69Z"/>
+    </mask>
+    <symbol id="nc-logo" viewBox="73.28 184.02 695.39 822.69"><rect x="73.28" y="184.02" width="695.39" height="822.69" fill="currentColor" mask="url(#nc-mask)"/></symbol>
+  </defs>
+</svg>
+<a class="mark" href="https://nicholasachow.com/" aria-label="Nick Chow"><svg viewBox="73.28 184.02 695.39 822.69" aria-hidden="true"><use href="#nc-logo"/></svg></a>
+<script src="data.js"></script>
+<script>
+const DATA = window.DATA || [];
+const TIER_COLOR = {
+  "Collector": "var(--t-collect)",
+  "Curation & aggregation": "var(--t-curate)",
+  "Simulation & synthetic": "var(--t-sim)",
+  "Capture hardware": "var(--t-hw)",
+};
+const TIERS = (window.LISTS && window.LISTS.tier) || Object.keys(TIER_COLOR);
+const L = window.LISTS || {};
+const has = k => DATA.some(d => d[k] !== undefined && d[k] !== "" && !(Array.isArray(d[k]) && !d[k].length));
+const union = k => { const seen = new Set(L[k] || []); DATA.forEach(d => (d[k] || []).forEach(v => seen.add(v))); return [...seen].filter(v => DATA.some(d => (d[k] || []).includes(v))); };
+const MODS = union("mods");
+const REGIONS = union("region");
+// Table columns render only when the sheet exposes them (a column hidden in Config never reaches data.js)
+const COLS = [
+  { k:"name",   label:"Company",           show: true },
+  { k:"tier",   label:"Tier",              show: has("tier") },
+  { k:"mods",   label:"Modality",          show: has("mods") },
+  { k:"hq",     label:"HQ / capture",      show: has("hq") || has("capture") },
+  { k:"sample", label:"Sample or dataset", show: has("sample") },
+  { k:"notes",  label:"Notes",             show: has("notes") || has("funding") || has("founders") },
+].filter(c => c.show);
+
+
+const state = { q:"", tier:new Set(), mod:new Set(), region:new Set(), sortK:"tier", sortDir:1 };
+if (!has("tier")) state.sortK = "name";
+const $ = s => document.querySelector(s);
+
+function tierOrder(t){ return TIERS.indexOf(t); }
+
+function filtered(){
+  const q = state.q.trim().toLowerCase();
+  return DATA.filter(d => {
+    if (state.tier.size && !state.tier.has(d.tier)) return false;
+    if (state.mod.size && !(d.mods || []).some(m => state.mod.has(m))) return false;
+    if (state.region.size && !(d.region || []).some(r => state.region.has(r))) return false;
+    if (q) {
+      const hay = [d.name, d.zh, d.sub, d.tier, (d.mods || []).join(" "), (d.region || []).join(" "), d.hq, d.capture, d.sample, d.notes, d.funding, d.founders].join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a,b) => {
+    const k = state.sortK;
+    let va, vb;
+    if (k === "tier") { va = tierOrder(a.tier); vb = tierOrder(b.tier); if (va === vb) { va = a.name; vb = b.name; } }
+    else if (k === "mods") { va = (a.mods||[]).join(); vb = (b.mods||[]).join(); }
+    else { va = (a[k]||"").toString().toLowerCase(); vb = (b[k]||"").toString().toLowerCase(); }
+    if (va < vb) return -1 * state.sortDir;
+    if (va > vb) return 1 * state.sortDir;
+    return 0;
+  });
+}
+
+function esc(s){ return (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function render(){
+  const rows = filtered();
+  const cell = {
+    name:   d => `<td class="co">${d.url ? `<a href="${esc(d.url)}" target="_blank" rel="noopener">${esc(d.name)}</a>` : esc(d.name)}${d.zh ? `<span class="zh">${esc(d.zh)}</span>` : ""}${d.sub ? `<span class="sub">${esc(d.sub)}</span>` : ""}</td>`,
+    tier:   d => `<td><span class="tier" style="--c:${TIER_COLOR[d.tier] || "var(--ink-3)"}"><i></i>${esc(d.tier)}</span></td>`,
+    mods:   d => `<td><div class="tags">${(d.mods || []).map(m => `<span class="tag">${esc(m)}</span>`).join("") || "—"}</div></td>`,
+    hq:     d => `<td class="geo">${esc(d.hq) || "—"}${d.capture ? `<span class="cap">Capture: ${esc(d.capture)}</span>` : ""}</td>`,
+    sample: d => `<td class="sample">${d.sample ? (d.sample_url ? `<a href="${esc(d.sample_url)}" target="_blank" rel="noopener">${esc(d.sample)}</a>` : esc(d.sample)) : "—"}</td>`,
+    notes:  d => `<td class="notes">${esc(d.notes) || "—"}${d.funding ? `<span class="cap">Funding: ${esc(d.funding)}</span>` : ""}${d.founders ? `<span class="cap">Founders: ${esc(d.founders)}</span>` : ""}</td>`,
+  };
+  $("#rows").innerHTML = rows.length ? rows.map(d => `<tr>${COLS.map(c => cell[c.k](d)).join("")}</tr>`).join("")
+    : `<tr><td colspan="${COLS.length}" class="empty">No companies match. Clear a filter.</td></tr>`;
+  $("#count").textContent = `${rows.length} of ${DATA.length} companies`;
+  const any = state.tier.size || state.mod.size || state.region.size || state.q;
+  $("#clear").hidden = !any;
+  document.querySelectorAll(".stage[data-tier]").forEach(el => el.classList.toggle("active", state.tier.has(el.dataset.tier)));
+  document.querySelectorAll("thead th").forEach(th => {
+    th.querySelector(".arrow").textContent = th.dataset.k === state.sortK ? (state.sortDir === 1 ? "↑" : "↓") : "";
+  });
+}
+
+const params = new URLSearchParams(location.search);
+["tier", "mod", "region"].forEach(k => params.getAll(k).forEach(v => state[k].add(v)));
+state.q = params.get("q") || "";
+
+function chips(containerSel, items, set){
+  const c = $(containerSel);
+  items.forEach(it => {
+    const b = document.createElement("button");
+    b.className = "chip" + (set.has(it) ? " on" : ""); b.textContent = it;
+    b.addEventListener("click", () => { set.has(it) ? set.delete(it) : set.add(it); b.classList.toggle("on"); render(); });
+    c.appendChild(b);
+  });
+}
+$("#head").innerHTML = COLS.map(c => `<th data-k="${c.k}">${c.label}<span class="arrow"></span></th>`).join("");
+chips("#tierChips", TIERS.filter(t => DATA.some(d => d.tier === t)), state.tier);
+if (MODS.length) chips("#modChips", MODS, state.mod); else $("#modChips").parentElement.hidden = true;
+if (REGIONS.length) chips("#regionChips", REGIONS, state.region); else $("#regionChips").parentElement.hidden = true;
+if (!has("tier")) $("#tierChips").parentElement.hidden = true;
+
+document.querySelectorAll(".stage[data-tier]").forEach(el => {
+  el.addEventListener("click", () => {
+    const t = el.dataset.tier;
+    state.tier.has(t) ? state.tier.delete(t) : state.tier.add(t);
+    document.querySelectorAll("#tierChips .chip").forEach(ch => ch.classList.toggle("on", state.tier.has(ch.textContent)));
+    render();
+    $("#tbl").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+});
+document.querySelectorAll("thead th").forEach(th => th.addEventListener("click", () => {
+  const k = th.dataset.k;
+  if (state.sortK === k) state.sortDir *= -1; else { state.sortK = k; state.sortDir = 1; }
+  render();
+}));
+$("#q").value = state.q;
+$("#q").addEventListener("input", e => { state.q = e.target.value; render(); });
+$("#clear").addEventListener("click", () => {
+  state.q = ""; $("#q").value = ""; state.tier.clear(); state.mod.clear(); state.region.clear();
+  document.querySelectorAll(".chip").forEach(ch => ch.classList.remove("on"));
+  render();
+});
+
+// Stage counts
+(function(){
+  const byTier = t => DATA.filter(d => d.tier === t).length;
+  document.querySelectorAll("[data-count]").forEach(el => el.textContent = byTier(el.dataset.count));
+})();
+
+if (window.META && window.META.updated) {
+  const d = new Date(window.META.updated + "T00:00:00");
+  $("#updated").textContent = d.toLocaleDateString("en-US", {month:"short", day:"numeric", year:"numeric"});
+}
+render();
+</script>
+</body>
+</html>
